@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "me.orange"
-version = "1.0.0-SNAPSHOT"
+version = "1.0.0"
 
 application {
     mainClass = "io.ktor.server.netty.EngineMain"
