@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minecraft Mapart Generator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1e1e1e;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #2d2d2d;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+            text-align: center;
+            width: 100%;
+            max-width: 650px; /* Widened for the grid */
+        }
+        .file-upload {
+            margin: 20px 0;
+        }
+        input[type="file"] {
+            display: none;
+        }
+        .custom-file-upload {
+            border: 2px dashed #4CAF50;
+            display: inline-block;
+            padding: 20px;
+            cursor: pointer;
+            border-radius: 8px;
+            width: 80%;
+            transition: background-color 0.3s;
+        }
+        .custom-file-upload:hover {
+            background-color: #388E3C;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #777;
+            cursor: not-allowed;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 1em;
+        }
+
+        /* --- New Grid Styles --- */
+        .map-preview-wrapper {
+            margin-top: 20px;
+            background-color: #1a1a1a;
+            padding: 5px;
+            border-radius: 8px;
+            border: 2px solid #444;
+        }
+        .map-grid {
+            display: grid;
+            gap: 2px;
+        }
+        .map-cell {
+            aspect-ratio: 1 / 1; /* Forces perfect squares like MC maps */
+            position: relative;
+            cursor: pointer;
+            background-repeat: no-repeat;
+            overflow: hidden;
+            border-radius: 2px;
+        }
+        /* The dimming overlay */
+        .map-cell .overlay {
+            position: absolute;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.75);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+            padding: 5px;
+        }
+        .map-cell:hover .overlay {
+            opacity: 1; /* Dim and show text on hover */
+        }
+        .map-cell .cmd-text {
+            font-family: monospace;
+            font-size: 0.85em;
+            word-break: break-all;
+            color: #a5d6a7;
+            pointer-events: none; /* Let the click pass to the cell */
+        }
+        .map-cell .copy-hint {
+            font-size: 0.75em;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #ffffff;
+            pointer-events: none;
+        }
+    </style>
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+<div class="container">
+    <h2>Mapart Generator</h2>
+    <p>Upload a PNG to generate your in-game map.</p>
+
+    <form id="uploadForm">
+        <div class="file-upload">
+            <label for="imageInput" class="custom-file-upload">
+                <span id="fileName">Click to select a PNG</span>
+            </label>
+            <input type="file" id="imageInput" accept="image/png, image/jpeg" required>
+        </div>
+        <div style="margin-top: 15px; margin-bottom: 15px;">
+            <label>Grid Width: <input type="number" id="gridX" value="1" min="1" max="10" style="width: 40px;"></label>
+            <label style="margin-left: 15px;">Grid Height: <input type="number" id="gridY" value="1" min="1" max="10" style="width: 40px;"></label>
+        </div>
+        <button type="submit" id="submitBtn">Generate Map</button>
+    </form>
+
+    <div id="result"></div>
+</div>
+
+</body>
+</html>

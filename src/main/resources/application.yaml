@@ -1,0 +1,10 @@
+ktor:
+  deployment:
+    port: 8080
+  application:
+    modules:
+      - me.orange.RoutingKt.configureRouting
+
+app:
+  minecraft:
+    worldDataPath: ${?MC_WORLD_DATA_PATH}
