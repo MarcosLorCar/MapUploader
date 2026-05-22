@@ -28,7 +28,7 @@ Before starting the web application, you must configure your Minecraft server to
 2. **Enable RCON**
    Open your `server.properties` file and set the following values:
 ```properties
-   enable-rcon=true
+enable-rcon=true
 rcon.password=your_secret_password
 rcon.port=25575
    ```
