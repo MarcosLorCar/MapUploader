@@ -5,40 +5,40 @@ import net.querz.nbt.io.NamedTag
 import net.querz.nbt.tag.CompoundTag
 import org.slf4j.LoggerFactory
 import java.io.File
-import java.util.concurrent.atomic.AtomicInteger
 
 object MapIdManager {
     private val logger = LoggerFactory.getLogger(MapIdManager::class.java)
 
-    private var currentHighestMapId: AtomicInteger? = null
+    private var currentHighestMapId: Int? = null
     private lateinit var lastIdFile: File
 
     fun initialize(dataDir: File) {
+        if (!dataDir.exists()) {
+            dataDir.mkdirs()
+            logger.info("Created missing maps directory at: {}", dataDir.absolutePath)
+        }
+
         lastIdFile = File(dataDir, "last_id.dat")
 
         if (currentHighestMapId == null) {
+            // Edge Case 2: Missing last_id.dat is handled smoothly here.
+            // readHighestId() returns -1 if missing, so nextId starts at 0.
             val nextId = readHighestIdFromNbt() + 1
-            currentHighestMapId = AtomicInteger(nextId)
+            currentHighestMapId = nextId
 
-            // 2. Use logger instead of println
             logger.info("MapIdManager initialized. Next available Map ID: {}", nextId)
-
-            logger.warn("=========================================================")
-            logger.warn("WARNING: If the Minecraft server is currently running,")
-            logger.warn("it may overwrite last_id.dat from its RAM, erasing IDs!")
-            logger.warn("=========================================================")
         }
     }
 
     @Synchronized
     fun getNextId(): Int {
-        val counter = currentHighestMapId
+        val current = currentHighestMapId
             ?: throw IllegalStateException("MapIdManager was not initialized before use!")
 
-        // Safely get the next number for our new map
-        val assignedId = counter.getAndIncrement()
+        // Safely use and increment the standard Int
+        val assignedId = current
+        currentHighestMapId = current + 1
 
-        // Write to the file while locked so no other thread can interrupt
         updateLastIdFile(assignedId)
 
         return assignedId

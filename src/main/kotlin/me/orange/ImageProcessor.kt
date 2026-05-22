@@ -8,10 +8,10 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.awt.RenderingHints
 import java.awt.image.BufferedImage
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.pow
 
 object ImageProcessor {
-
     @Serializable
     data class ColorSet(
         val mapdatId: Int,
@@ -47,6 +47,8 @@ object ImageProcessor {
     }
 
     private val precomputedPalette: List<PrecomputedColor> = loadAndPrecomputePalette()
+
+    private val colorCache = ConcurrentHashMap<Int, Byte>()
 
     private fun loadAndPrecomputePalette(): List<PrecomputedColor> {
         val inputStream = this::class.java.classLoader.getResourceAsStream("coloursJSON.json")
@@ -102,13 +104,16 @@ object ImageProcessor {
                             val absX = (mapX * 128) + pixelX
                             val absY = (mapY * 128) + pixelY
 
-                            // Read from our fast 1D buffer instead of the image object
                             val rgb = rgbArray[absY * totalWidth + absX]
-                            val red = (rgb shr 16) and 0xFF
-                            val green = (rgb shr 8) and 0xFF
-                            val blue = rgb and 0xFF
 
-                            val bestId = getClosestMapdatId(intArrayOf(red, green, blue))
+                            val cleanRgb = rgb and 0xFFFFFF
+
+                            val bestId = colorCache.getOrPut(cleanRgb) {
+                                val red = (rgb shr 16) and 0xFF
+                                val green = (rgb shr 8) and 0xFF
+                                val blue = rgb and 0xFF
+                                getClosestMapdatId(intArrayOf(red, green, blue)).toByte()
+                            }
                             colorArray[index] = bestId.toByte()
                             index++
                         }

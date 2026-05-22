@@ -29,11 +29,13 @@ object HistoryManager {
         }
     }
 
+    @Synchronized
     fun addProject(project: UploadProject) {
         projects.add(0, project)
         historyFile.writeText(json.encodeToString(projects))
     }
 
+    @Synchronized
     fun getHistoryForSession(sessionId: String): List<UploadProject> {
         return projects.filter { it.session_id == sessionId }
     }
