@@ -1,25 +1,28 @@
 package me.orange
 
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import java.awt.RenderingHints
 import java.awt.image.BufferedImage
-import java.io.InputStreamReader
-import kotlin.collections.iterator
 import kotlin.math.pow
 
 object ImageProcessor {
 
+    @Serializable
     data class ColorSet(
         val mapdatId: Int,
         val tonesRGB: Map<String, IntArray>
     )
 
-    // A new data class to hold the PRECOMPUTED math
+    class MapProcessingResult(
+        val chunks: List<ByteArray>,
+        val previewImage: BufferedImage
+    )
+
     private data class PrecomputedColor(
         val finalMapdatId: Int,
         val lab: DoubleArray
@@ -49,14 +52,15 @@ object ImageProcessor {
         val inputStream = this::class.java.classLoader.getResourceAsStream("coloursJSON.json")
             ?: throw IllegalStateException("coloursJSON.json not found!")
 
-        val reader = InputStreamReader(inputStream)
-        val type = object : TypeToken<Map<String, ColorSet>>() {}.type
-        val rawPalette: Map<String, ColorSet> = Gson().fromJson(reader, type)
+        val jsonString = inputStream.bufferedReader().use { it.readText() }
+
+        val lenientJson = Json { ignoreUnknownKeys = true }
+
+        val rawPalette: Map<String, ColorSet> = lenientJson.decodeFromString(jsonString)
 
         val precomputed = mutableListOf<PrecomputedColor>()
         val toneOffsets = mapOf("dark" to 0, "normal" to 1, "light" to 2, "unobtainable" to 3)
 
-        // Calculate the L*a*b* values for the palette RIGHT NOW
         for ((_, colorData) in rawPalette) {
             val baseId = colorData.mapdatId
             for ((tone, toneRgb) in colorData.tonesRGB) {
@@ -70,11 +74,11 @@ object ImageProcessor {
     }
 
     // The Multi-Threaded Processing Loop
-    suspend fun processMapGrid(originalImage: BufferedImage, gridX: Int, gridY: Int): List<ByteArray> = coroutineScope {
+    suspend fun processMapGrid(originalImage: BufferedImage, gridX: Int, gridY: Int): MapProcessingResult = coroutineScope {
         val totalWidth = gridX * 128
         val totalHeight = gridY * 128
 
-        val resizedImg = BufferedImage(totalWidth, totalHeight, BufferedImage.TYPE_INT_RGB)
+        val resizedImg = BufferedImage(totalWidth, totalHeight, BufferedImage.TYPE_INT_ARGB)
         val g = resizedImg.createGraphics()
         g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC)
         g.drawImage(originalImage, 0, 0, totalWidth, totalHeight, null)
@@ -115,10 +119,10 @@ object ImageProcessor {
         }
 
         // Wait for all CPU threads to finish their chunks, then return the list
-        deferredChunks.awaitAll()
+        // Wait for chunks, then return them alongside the resized image
+        MapProcessingResult(deferredChunks.awaitAll(), resizedImg)
     }
 
-    // 5. The Optimized Distance Calculator
     private fun getClosestMapdatId(pixelRgb: IntArray): Int {
         val pixelLab = rgb2lab(pixelRgb)
 

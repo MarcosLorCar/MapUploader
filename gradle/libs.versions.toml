@@ -1,9 +1,14 @@
 [versions]
-kotlin = "2.3.21"
-logback = "1.5.21"
+kotlin = "2.2.0"
+logback = "1.4.14"
+nbt = "6.1"
+rcon = "1.2.0"
 
 [libraries]
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+nbt = { module = "com.github.Querz:NBT", version.ref = "nbt" }
+rcon = { module = "nl.vv32.rcon:rcon", version.ref = "rcon" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-plugin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }

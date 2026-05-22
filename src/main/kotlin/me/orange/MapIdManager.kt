@@ -3,36 +3,42 @@ package me.orange
 import net.querz.nbt.io.NBTUtil
 import net.querz.nbt.io.NamedTag
 import net.querz.nbt.tag.CompoundTag
+import org.slf4j.LoggerFactory
 import java.io.File
 import java.util.concurrent.atomic.AtomicInteger
 
 object MapIdManager {
+    private val logger = LoggerFactory.getLogger(MapIdManager::class.java)
 
     private var currentHighestMapId: AtomicInteger? = null
     private lateinit var lastIdFile: File
 
     fun initialize(dataDir: File) {
-        // Point this directly to the last_id.dat file.
-        // If it sits in the 'data' folder instead of 'maps', just adjust the path!
         lastIdFile = File(dataDir, "last_id.dat")
 
         if (currentHighestMapId == null) {
             val nextId = readHighestIdFromNbt() + 1
             currentHighestMapId = AtomicInteger(nextId)
-            println("me.orange.MapIdManager initialized. Next available Map ID: $nextId")
+
+            // 2. Use logger instead of println
+            logger.info("MapIdManager initialized. Next available Map ID: {}", nextId)
+
+            logger.warn("=========================================================")
+            logger.warn("WARNING: If the Minecraft server is currently running,")
+            logger.warn("it may overwrite last_id.dat from its RAM, erasing IDs!")
+            logger.warn("=========================================================")
         }
     }
 
+    @Synchronized
     fun getNextId(): Int {
         val counter = currentHighestMapId
-            ?: throw IllegalStateException("me.orange.MapIdManager was not initialized before use!")
+            ?: throw IllegalStateException("MapIdManager was not initialized before use!")
 
         // Safely get the next number for our new map
         val assignedId = counter.getAndIncrement()
 
-        // CRITICAL: We must instantly save this new number back into last_id.dat!
-        // If we don't, the Minecraft server won't know we used this ID, and
-        // the next time a player crafts a map in-game, it will overwrite your map art!
+        // Write to the file while locked so no other thread can interrupt
         updateLastIdFile(assignedId)
 
         return assignedId
@@ -44,35 +50,32 @@ object MapIdManager {
         try {
             val root = NBTUtil.read(lastIdFile).tag as CompoundTag
 
-            // 1. Check if the "data" tag exists first
             if (root.containsKey("data")) {
                 val dataTag = root.getCompoundTag("data")
 
-                // 2. Read the "map" integer from inside the data tag
                 if (dataTag.containsKey("map")) {
                     return dataTag.getInt("map")
                 }
             }
             return -1
-        } catch (_: Exception) {
-            println("Warning: Failed to read last_id.dat. Defaulting to -1.")
+        } catch (e: Exception) {
+            // Log the warning safely
+            logger.warn("Failed to read last_id.dat. Defaulting to -1.", e)
             return -1
         }
     }
 
     private fun updateLastIdFile(newLatestId: Int) {
         try {
-            // Read the existing file, or create a brand new nested structure if it's missing
             val root = if (lastIdFile.exists()) {
                 NBTUtil.read(lastIdFile).tag as CompoundTag
             } else {
                 val newRoot = CompoundTag()
-                newRoot.putInt("DataVersion", 3465) // Add a default data version
-                newRoot.put("data", CompoundTag())  // Add the empty 'data' compound
+                newRoot.putInt("DataVersion", 3465)
+                newRoot.put("data", CompoundTag())
                 newRoot
             }
 
-            // Safely get the "data" compound tag
             val dataTag = if (root.containsKey("data")) {
                 root.getCompoundTag("data")
             } else {
@@ -81,15 +84,12 @@ object MapIdManager {
                 newData
             }
 
-            // Update the map ID *inside* the data tag
             dataTag.putInt("map", newLatestId)
 
-            // Save it back uncompressed!
             NBTUtil.write(NamedTag("", root), lastIdFile, false)
 
         } catch (e: Exception) {
-            println("CRITICAL ERROR: Could not save last_id.dat! Minecraft might overwrite your maps!")
-            e.printStackTrace()
+            logger.error("CRITICAL ERROR: Could not save last_id.dat! Minecraft might overwrite your maps!", e)
         }
     }
 }

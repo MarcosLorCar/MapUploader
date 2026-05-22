@@ -105,11 +105,11 @@
             opacity: 1; /* Dim and show text on hover */
         }
         .map-cell .cmd-text {
-            font-family: monospace;
-            font-size: 0.85em;
-            word-break: break-all;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 1.1em;
+            font-weight: bold;
             color: #a5d6a7;
-            pointer-events: none; /* Let the click pass to the cell */
+            pointer-events: none;
         }
         .map-cell .copy-hint {
             font-size: 0.75em;
@@ -119,18 +119,18 @@
             pointer-events: none;
         }
     </style>
-    <script src="script.js" defer></script>
+    <script src="/script.js" defer></script>
 </head>
 <body>
 
 <div class="container">
     <h2>Mapart Generator</h2>
-    <p>Upload a PNG to generate your in-game map.</p>
+    <p>Upload an image (PNG or JPEG) to generate your in-game map.</p>
 
     <form id="uploadForm">
         <div class="file-upload">
             <label for="imageInput" class="custom-file-upload">
-                <span id="fileName">Click to select a PNG</span>
+                <span id="fileName">Click to select an image</span>
             </label>
             <input type="file" id="imageInput" accept="image/png, image/jpeg" required>
         </div>
@@ -142,6 +142,15 @@
     </form>
 
     <div id="result"></div>
+
+    <hr style="border: 1px solid #444; margin: 40px 0;">
+
+    <h3>Map Gallery</h3>
+    <p style="font-size: 0.85em; color: #aaa;">Click any previous map chunk to give it to yourself.</p>
+
+    <div id="history-gallery" style="display: flex; flex-direction: column; gap: 30px;">
+        <!-- Projects will be injected here -->
+    </div>
 </div>
 
 </body>

@@ -29,7 +29,5 @@ object MapGenerator {
 
         // Wrap 'root' in a NamedTag with an empty string name
         NBTUtil.write(NamedTag("", root), mapFile, true)
-
-        println("Successfully generated $mapId.dat!")
     }
 }

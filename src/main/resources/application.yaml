@@ -3,8 +3,12 @@ ktor:
     port: 8080
   application:
     modules:
-      - me.orange.RoutingKt.configureRouting
+      - me.orange.MainKt.module
 
 app:
   minecraft:
-    worldDataPath: ${?MC_WORLD_DATA_PATH}
+    worldDataPath: $MC_WORLD_DATA_PATH
+    rcon:
+      host: $MC_RCON_HOST:127.0.0.1
+      port: $MC_RCON_PORT:25575
+      password: ${MC_RCON_PASSWORD:}
