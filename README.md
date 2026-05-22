@@ -14,7 +14,7 @@ A high-performance Ktor backend and web interface designed to convert images int
 * Java 17 (JDK)
 * Gradle
 * A Minecraft Server with **RCON enabled**
-* The `MapUploader.zip` Datapack (included in this repository)
+* The [`MapUploader.zip`](MapUploader.zip) Datapack (included in this repository)
 
 ---
 
