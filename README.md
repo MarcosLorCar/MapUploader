@@ -49,7 +49,7 @@ The application relies on environment variables for configuration.
 
 | Variable | Required | Description |
 |---|---|---|
-| `MC_WORLD_DATA_PATH` | **Yes** | Absolute path to your world's `data` folder (where `last_id.dat` and `map_#.dat` files live). |
+| `MC_WORLD_DATA_PATH` | **Yes** | Absolute path to your world's `data/minecraft/maps` folder (where `last_id.dat` and maps' `#.dat` files live). |
 | `MC_RCON_PASSWORD` | **Yes** | The RCON password you set in `server.properties`. |
 | `MC_RCON_HOST` | No | RCON IP Address (Defaults to `127.0.0.1`). |
 | `MC_RCON_PORT` | No | RCON Port (Defaults to `25575`). |
@@ -65,14 +65,14 @@ The application relies on environment variables for configuration.
 
 **Linux / macOS**:
 ```bash
-   export MC_WORLD_DATA_PATH="/path/to/your/world/data"
+   export MC_WORLD_DATA_PATH="/path/to/your/world/data/minecraft/maps"
    export MC_RCON_PASSWORD="your_secret_password"
    java -jar build/libs/mapuploader-all.jar
    ```
 
 **Windows (Command Prompt)**:
 ```cmd
-   set MC_WORLD_DATA_PATH="C:\path\to\your\world\data"
+   set MC_WORLD_DATA_PATH="C:\path\to\your\world\data\minecraft\maps"
    set MC_RCON_PASSWORD="your_secret_password"
    java -jar build\libs\mapuploader-all.jar
    ```
