@@ -1,5 +1,7 @@
 # MapUploader Backend & Web UI
 
+![Minecraft Version](https://img.shields.io/badge/minecraft-26.1%E2%80%9326.1.2-green)
+
 A high-performance Ktor backend and web interface designed to convert images into Minecraft Map (`.dat`) files and deliver them instantly in-game.
 
 ## Features
