@@ -120,7 +120,7 @@ if (-not $JarUrl) { Die "Could not find a .jar asset in the '$Version' release o
 if ($Mode -and $Mode -notin @('proxy', 'normal')) { Die "Invalid -Mode '$Mode' (use 'proxy' or 'normal')." }
 if (-not $Mode) {
     Write-Host ''
-    Write-Log "Choose an installation type (docs: https://github.com/$Repo#installation):"
+    Write-Log "Choose an installation type (docs: https://github.com/$Repo/blob/main/docs/INSTALLATION.md):"
     Write-Host '   1) proxy  - one command starts the server + MapUploader together (recommended)'
     Write-Host '   2) normal - standalone web app with its own start script'
     $Mode = if ((Read-Host 'Enter 1 or 2') -eq '2') { 'normal' } else { 'proxy' }

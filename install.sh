@@ -104,7 +104,7 @@ JAR_URL="$(asset_url '\.jar$' || true)"
 # ----------------------------------------------------------------------------- mode
 if [ -z "$MODE" ]; then
     echo
-    log "Choose an installation type (docs: https://github.com/${REPO}#installation):"
+    log "Choose an installation type (docs: https://github.com/${REPO}/blob/main/docs/INSTALLATION.md):"
     echo "   1) proxy  - one command starts the server + MapUploader together (recommended)"
     echo "   2) normal - standalone web app with its own start script"
     case "$(prompt 'Enter 1 or 2: ' '1')" in 2) MODE="normal";; *) MODE="proxy";; esac

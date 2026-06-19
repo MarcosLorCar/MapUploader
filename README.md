@@ -46,7 +46,8 @@ You can run the web app in either of two ways:
 
 Run from your **Minecraft server directory** (the folder with `server.properties`). The
 installer downloads the latest release, auto-detects your RCON/world settings, and
-installs the datapack for you.
+installs the datapack for you. For a full walkthrough of both modes, see the
+**[Installation Guide](docs/INSTALLATION.md)**.
 
 **Linux / macOS**
 ```bash
