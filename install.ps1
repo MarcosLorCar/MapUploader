@@ -36,10 +36,15 @@ $Raw  = "https://raw.githubusercontent.com/$Repo/main"
 $SP   = 'server.properties'
 
 # ----------------------------------------------------------------------------- helpers
+# NOTE: we deliberately never call `exit`. When run via `irm ... | iex` (the documented
+# one-liner), `exit` would close the user's PowerShell window. Die throws instead, and
+# the try/catch around the main flow (bottom of the file) renders the error and stops
+# the script without killing the window.
+
 function Write-Log  ($m) { Write-Host "[MapUploader] $m" -ForegroundColor Cyan }
 function Write-Ok   ($m) { Write-Host "[MapUploader] $m" -ForegroundColor Green }
 function Write-Warn ($m) { Write-Host "[MapUploader] $m" -ForegroundColor Yellow }
-function Die        ($m) { Write-Host "[MapUploader] $m" -ForegroundColor Red; exit 1 }
+function Die        ($m) { throw $m }
 
 function Confirm-Action ($q) {
     if ($Yes) { return $true }
@@ -85,6 +90,11 @@ function Save-File ($url, $out) {
     Write-Log "Downloading $(Split-Path $out -Leaf)..."
     Invoke-WebRequest -Uri $url -OutFile $out -UseBasicParsing
 }
+
+# Everything below runs inside one try/catch so any Die (or unexpected error) is shown
+# cleanly and stops the script — without ever calling `exit` (which would close an
+# `irm | iex` window). try/catch shares the script scope, so $Mode/$Jar/etc. still work.
+try {
 
 # ----------------------------------------------------------------------------- checks
 $javaLine = try { (& java -version 2>&1)[0] } catch { Die 'Java is not installed. MapUploader needs Java 17 or newer.' }
@@ -139,7 +149,7 @@ java -jar mapuploader\mapuploader.jar @args
     Write-Host ''
     Write-Ok 'Done. Start the web app with:  .\start-mapuploader.ps1'
     if (-not $rconPass) { Write-Warn 'RCON password is empty in server.properties; in-game map delivery will fail until it is set.' }
-    exit 0
+    return
 }
 
 # ----------------------------------------------------------------------------- proxy
@@ -223,3 +233,10 @@ Write-Host ''
 Write-Ok 'All set. Start your server the way you normally do - MapUploader comes up with it.'
 Write-Log "Web UI: http://<host>:$Port/ (use /trigger UploadMap in-game for your link)."
 Write-Log 'To revert:  .\uninstall-mapuploader.ps1'
+
+}
+catch {
+    Write-Host ''
+    Write-Host "[MapUploader] ERROR: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host '[MapUploader] Installation stopped.' -ForegroundColor Red
+}
