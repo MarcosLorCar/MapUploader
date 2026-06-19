@@ -97,11 +97,20 @@ function Save-File ($url, $out) {
 try {
 
 # ----------------------------------------------------------------------------- checks
-$javaLine = try { (& java -version 2>&1)[0] } catch { Die 'Java is not installed. MapUploader needs Java 17 or newer.' }
-if ($javaLine -match '(\d+)') {
-    $major = [int]$Matches[1]
+if (-not (Get-Command java -ErrorAction SilentlyContinue)) {
+    Die 'Java is not installed or not on PATH. MapUploader needs Java 17 or newer.'
+}
+# `java -version` prints to STDERR; merging it with 2>&1 under $ErrorActionPreference='Stop'
+# would be promoted to a terminating error, so probe in a child scope that ignores that.
+$javaLine = & { $ErrorActionPreference = 'SilentlyContinue'; (java -version 2>&1 | Select-Object -First 1) }
+if ("$javaLine" -match '(\d+)\.(\d+)') {
+    $major = [int]$Matches[1]; if ($major -eq 1) { $major = [int]$Matches[2] } # 1.8 -> 8
     if ($major -lt 17) { Die "Java 17+ is required (found: $javaLine)." }
 }
+elseif ("$javaLine" -match '"?(\d+)') {
+    if ([int]$Matches[1] -lt 17) { Die "Java 17+ is required (found: $javaLine)." }
+}
+else { Write-Warn 'Could not determine the Java version; continuing anyway.' }
 if (-not (Test-Path $SP)) { Write-Warn 'No server.properties here. Run this from your server directory for auto-config.' }
 
 $JarUrl = Get-AssetUrl '\.jar$'
