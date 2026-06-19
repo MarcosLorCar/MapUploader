@@ -5,10 +5,12 @@ plugins {
 }
 
 group = "me.orange"
-version = "1.1.1"
+version = "1.2.0"
 
 application {
-    mainClass = "io.ktor.server.netty.EngineMain"
+    // Custom launcher: standalone web app by default, or a Minecraft-server proxy
+    // when a `proxied_*.jar` is present. See me/orange/Launcher.kt.
+    mainClass = "me.orange.LauncherKt"
 }
 
 kotlin {
